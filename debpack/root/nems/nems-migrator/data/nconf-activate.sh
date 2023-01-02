@@ -12,16 +12,16 @@
   $db_pass = $pass ;
   $hosts = array();
 
-	$conn = @($GLOBALS["___mysqli_ston"] = mysqli_connect($db_host,  $db_user,  $db_pass));
-	if($conn){
-			mysqli_select_db($conn, $db_name);
-			@((bool)mysqli_query($GLOBALS["___mysqli_ston"], "USE $db_name"));
-			$dbserver = 'main';
-			$conn->set_charset('utf8');
-			@mysqli_query($GLOBALS["___mysqli_ston"], "SET NAMES utf8") ;
-	} else {
-		die('Database not available');
-	}
+        $conn = @($GLOBALS["___mysqli_ston"] = mysqli_connect($db_host,  $db_user,  $db_pass));
+        if($conn){
+                        mysqli_select_db($conn, $db_name);
+                        @((bool)mysqli_query($GLOBALS["___mysqli_ston"], "USE $db_name"));
+                        $dbserver = 'main';
+                        $conn->set_charset('utf8');
+                        @mysqli_query($GLOBALS["___mysqli_ston"], "SET NAMES utf8") ;
+        } else {
+                die('Database not available');
+        }
 
   # Find all hosts
   $query = "SELECT * FROM `ConfigValues` WHERE `fk_id_attr` = 15";
@@ -46,12 +46,13 @@
 
   # Activate Host Presets
   printf('Activating default host presets... ');
-  # 5231, 5258, etc are the ID corresponding with the host preset, which can be found by enabling General Query Log and monitoring the insert command when saving the host presets
+  # 5231, 5258, etc are the ID corresponding with the host preset, which can be found by enabling General Query Log and monitoring the insert command when saving the host presets or just hover over the pencil
 # /etc/mysql/mariadb.conf.d/50-server.cnf
-  # 5481 however, is the ID of the NEMS host (default host)
+  # 5481/$fk_id however, is the ID of the NEMS host (default host). Can be obtained by also tailing General Query Log and then edit the host. Scroll up to the top of the query to get the id or hover the pencil in Nconf
 # tail -f /var/log/mysql/mysql.log | grep ", 81, 0)"
   if ($ver >= 1.6) {
-    $fk_id = 5331;
+#    $fk_id = 5331;
+    $fk_id = 5578; // 1.6 2022
     $query = "INSERT INTO ItemLinks (fk_id_item, fk_item_linked2, fk_id_attr, cust_order) VALUES (5276, $fk_id, 81, 0), (5259, $fk_id, 81, 0), (5231, $fk_id, 81, 0), (5258, $fk_id, 81, 0);";
   } else if ($ver >= 1.5) { // NEMS host was re-created, changing the ID from 5286 to 5473, then in NEMS 1.6 branch it is 5481.
 #    $query = "INSERT INTO ItemLinks (fk_id_item, fk_item_linked2, fk_id_attr, cust_order) VALUES (5276, 5473, 81, 0), (5259, 5473, 81, 0), (5231, 5473, 81, 0), (5258, 5473, 81, 0);";
