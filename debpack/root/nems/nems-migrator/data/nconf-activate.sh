@@ -46,6 +46,7 @@
 
   # Activate Host Presets
   printf('Activating default host presets... ');
+  if (isset($query)) unset($query);
   if ($ver >= 1.6) {
 #    $fk_id = 5340; ## The NEMS Sample Host ID, obtained by hovering over it in NEMS NConf.
     ## 5231, 5258, etc are the ID corresponding with the host preset, which can be found by hovering over the host preset in NEMS NConf.
@@ -57,6 +58,8 @@
   } else { // older version before NEMS host was re-created
     $query = "INSERT INTO ItemLinks (`fk_id_item`,`fk_item_linked2`,`fk_id_attr`,`cust_order`) VALUES (5231,5286,81,0),(5258,5286,81,0),(5259,5286,81,0),(5276,5286,81,0);";
   }
-  $result = @mysqli_query($GLOBALS["___mysqli_ston"], $query);
-  if ($result) { echo ' Done.'; } else { echo ' Error.'; }
+  if (isset($query)) {
+    $result = @mysqli_query($GLOBALS["___mysqli_ston"], $query);
+    if ($result) { echo ' Done.'; } else { echo ' Error.'; }
+  }
   echo PHP_EOL;
