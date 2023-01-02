@@ -47,9 +47,11 @@
   # Activate Host Presets
   printf('Activating default host presets... ');
   if ($ver >= 1.6) {
-    $fk_id = 5340; ## The NEMS Sample Host ID, obtained by hovering over it in NEMS NConf.
+#    $fk_id = 5340; ## The NEMS Sample Host ID, obtained by hovering over it in NEMS NConf.
     ## 5231, 5258, etc are the ID corresponding with the host preset, which can be found by hovering over the host preset in NEMS NConf.
-    $query = "INSERT INTO ItemLinks (fk_id_item, fk_item_linked2, fk_id_attr, cust_order) VALUES (5276, $fk_id, 81, 0), (5259, $fk_id, 81, 0), (5231, $fk_id, 81, 0), (5258, $fk_id, 81, 0);";
+#    $query = "INSERT INTO ItemLinks (fk_id_item, fk_item_linked2, fk_id_attr, cust_order) VALUES (5276, $fk_id, 81, 0), (5259, $fk_id, 81, 0), (5231, $fk_id, 81, 0), (5258, $fk_id, 81, 0);";
+# No longer needed; host presets are included in the clean database dump, along with their misccommands.
+    echo ' Done.'; // Just for the sake of output.
   } else if ($ver >= 1.5) { // NEMS host was re-created, changing the ID from 5286 to 5473, then in NEMS 1.6 branch it is 5481.
     $query = "INSERT INTO ItemLinks (fk_id_item, fk_item_linked2, fk_id_attr, cust_order) VALUES (5276, 5481, 81, 0), (5259, 5481, 81, 0), (5231, 5481, 81, 0), (5258, 5481, 81, 0);";
   } else { // older version before NEMS host was re-created
