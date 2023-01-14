@@ -5,3 +5,6 @@ if [[ -d /etc/rpimonitor/template/ ]]; then
   cp -f /root/nems/nems-migrator/data/rpimonitor/template/version.conf /etc/rpimonitor/template/
   /usr/bin/systemctl restart rpimonitor
 fi
+
+# This package brings in a new logrotate.d configuration, so restart logrotate service
+/usr/bin/systemctl restart logrotate
