@@ -4,6 +4,6 @@ Priority: important
 Section: migrator
 Maintainer: NEMS Linux <nems@category5.tv>
 Architecture: all
-Version: 1.6.020
+Version: 1.6.021
 Provides: nems-migrator-data
 Description: NEMS Migrator Data

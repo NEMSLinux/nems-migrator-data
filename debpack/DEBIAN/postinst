@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Ensure systemctl resides at both common locations
+if [[ ! -e /usr/bin/systemctl ]]; then
+  if [[ -e /bin/systemctl ]]; then
+    ln -s /bin/systemctl /usr/bin/systemctl
+  fi
+fi
+
 # Use the updated version of RPI-Monitor config
 if [[ -d /etc/rpimonitor/template/ ]]; then
   cp -f /root/nems/nems-migrator/data/rpimonitor/template/version.conf /etc/rpimonitor/template/
