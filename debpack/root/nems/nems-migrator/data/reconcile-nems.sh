@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 
-echo "Consolidating NEMS SST configuration";
+echo "Consolidating NEMS SST configuration:" . PHP_EOL;
 
 // Define the filenames for the current and backup configuration files
 $currentFile = '/usr/local/share/nems/nems.conf';
@@ -50,7 +50,8 @@ foreach ($backupConfig as $key => $value) {
 $backupContent = '';
 foreach ($backupConfig as $key => $value) {
     $backupContent .= "$key=$value" . PHP_EOL;
+    echo "Importing: \033[97m" . $key . "\033[0m" . PHP_EOL;
 }
 file_put_contents($currentFile, $backupContent);
 
-echo "Consolidation complete." . PHP_EOL;
+echo "Consolidation complete." . PHP_EOL . PHP_EOL;

@@ -10,7 +10,7 @@ $confdest = $argv[3];
   // This script is used to reconcile the settings for default NEMS Nagios configs with your NEMS-Migrator backup.
   // We'll take care of the commands / services / hosts configs, but will leave users as is so we don't clobber the nems-init account data
 
-  echo "reconcile-nagios...";
+  echo PHP_EOL . "Creating Nagios Core config files:" . PHP_EOL;
 
   $files = array(
     array('file'=>'Default_collector/advanced_services.cfg','unique'=>'service_description'),
@@ -35,7 +35,7 @@ $confdest = $argv[3];
     $files = array_merge($files,$files2);
   }
 
-  echo 'Reconciling ' . count($files) . ' files...' . PHP_EOL;
+  echo 'Reconciling ' . count($files) . ' files.' . PHP_EOL;
 
   foreach ($files as $file) {
     $backup = '/tmp/nems_migrator_restore' . $confsrc . '/' . $file['file'];
@@ -108,7 +108,7 @@ $confdest = $argv[3];
   }
 
 
-    echo 'Consolidation complete.';
+    echo 'Consolidation complete.' . PHP_EOL;
 
   echo PHP_EOL;
 
