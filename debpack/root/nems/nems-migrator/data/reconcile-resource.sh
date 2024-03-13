@@ -5,7 +5,7 @@
 # Traditional "replacement" of the config file would result in those new settings missing.
 # So this script consolidates the data between the source (backup.nems) and destination (resource.cfg).
 
-echo "reconcile-resource... " . PHP_EOL;
+echo "Reconciling Nagios resource.cfg against backup... " . PHP_EOL;
 
 $resourcesrc = $argv[1];
 $resourcedest = $argv[2];
@@ -48,10 +48,11 @@ if (strpos($destContent, $newHeader) === false) {
 // Consolidate settings from source to destination
 foreach (explode(PHP_EOL, $sourceContent) as $line) {
     $line = trim($line);
-    echo '  Importing: ' . $line . PHP_EOL;
+//    echo '  Importing: ' . $line . PHP_EOL;
     if (substr($line, 0, 1) == '$') {
         $parts = explode('=', $line, 2);
         $variable = trim(substr($parts[0], 1));
+        echo '  Importing $' . $variable . PHP_EOL;
         $value = isset($parts[1]) ? trim($parts[1]) : '';
 
         // Check if the variable already exists in destination content
