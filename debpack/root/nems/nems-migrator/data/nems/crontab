@@ -18,7 +18,8 @@
 0 0 * * 1 /usr/local/share/nems/nems-scripts/monitorix.sh year > /dev/null 2>&1
 
 # Run a weekly system benchmark of the NEMS server to assist with troubleshooting NEMS0001
-0 3 * * 0 /usr/local/share/nems/nems-scripts/benchmark.sh > /var/log/nems/benchmark.log
+# Deprecated: Was moved to nems-scripts as nems-benchmark, and now runs as part of fixes.sh
+# 0 3 * * 0 /usr/local/share/nems/nems-scripts/benchmark.sh > /var/log/nems/benchmark.log
 
 # NEMS Anonymous Stats NEMS0002
 @reboot /usr/local/share/nems/nems-scripts/stats.sh
