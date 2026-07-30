@@ -141,6 +141,15 @@ file_group="www-data"
 ;logonenvvar="REMOTE_USER"
 ;logonenvcreateuser="1"
 ;logonenvcreaterole="Guests"
+
+; Tells NagVis to rely on Apache's REMOTE_USER environment variable used by NEMS SSO
+logonmodule="LogonEnv"
+logonenvvar="REMOTE_USER"
+
+; Automatically map authenticated SSO users to NagVis roles
+logonenvcreateuser="1"
+logonenvcreaterole="Users"
+
 ;
 ; Enable/Disable access to permitted monitoring objects only. This is useful if you want
 ; to restrict the access to status information by NagVis AND by the authorization mechanism
