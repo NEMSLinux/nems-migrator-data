@@ -1,6 +1,106 @@
 #!/usr/bin/env tclsh
 # Modernized MOTD script for NEMS Linux
 
+# Determine and output the Last Login date and time
+# Thanks to MarshMan for pointing out the horrible PAM formatting during Developer Lockdown v3!
+
+# Detect active target user
+proc get_target_user {} {
+    foreach var {PAM_USER LOGNAME USER SUDO_USER} {
+        if {[info exists ::env($var)] && $::env($var) ne "" && $::env($var) ne "root"} {
+            return $::env($var)
+        }
+    }
+    if {![catch {exec logname} u] && $u ne "" && $u ne "root"} {
+        return [string trim $u]
+    }
+    return ""
+}
+
+set target_user [get_target_user]
+set login_events {}
+
+# Query wtmpdb / last
+if {![catch {exec last -n 30 -a} last_out] && [string length [string trim $last_out]] > 0} {
+    set lines [split $last_out "\n"]
+    foreach line $lines {
+        if {[regexp {^(\S+)\s+(\S+)\s+([A-Za-z]{3}\s+[A-Za-z]{3}\s+[\d\s]\d\s+\d{2}:\d{2}(?::\d{2})?(?:\s+\d{4})?)} $line -> u tty date_raw]} {
+            if {$u in {reboot shutdown wtmp}} { continue }
+            set tokens {}
+            foreach token [split $line " "] {
+                if {$token ne ""} { lappend tokens $token }
+            }
+            set host [lindex $tokens end]
+            lappend login_events [list $u $date_raw $host]
+        }
+    }
+}
+
+# Fallback to journalctl
+if {[llength $login_events] == 0} {
+    set journal_out ""
+    catch {set journal_out [exec journalctl --grep "Accepted " -n 100 --no-pager]}
+    set lines [split $journal_out "\n"]
+    foreach line $lines {
+        if {[regexp {Accepted\s+\S+\s+for\s+(\S+)\s+from\s+(\S+)} $line -> u ip]} {
+            set date_raw [string range $line 0 14]
+            lappend login_events [list $u $date_raw $ip]
+        }
+    }
+}
+
+# Auto-detect target user if not set in environment
+if {$target_user eq "" && [llength $login_events] > 0} {
+    set target_user [lindex [lindex $login_events end] 0]
+}
+
+# Filter events for target user
+set user_events {}
+foreach event $login_events {
+    if {[lindex $event 0] eq $target_user} {
+        lappend user_events $event
+    }
+}
+
+# Display logic
+if {[llength $user_events] >= 2} {
+    set prev [lindex $user_events end-1]
+    set login_user [lindex $prev 0]
+    set date_raw   [lindex $prev 1]
+    set host_ip    [lindex $prev 2]
+    if {![regexp {\d{4}} $date_raw]} {
+        set year [clock format [clock seconds] -format "%Y"]
+        set date_raw "$date_raw $year"
+    }
+    if {[catch {
+        set ts [clock scan $date_raw]
+        set day_name   [clock format $ts -format "%A"]
+        set month_name [clock format $ts -format "%B"]
+        set day_num    [scan [clock format $ts -format "%d"] %d]
+        set year_str   [clock format $ts -format "%Y"]
+        set ampm       [string tolower [clock format $ts -format "%p"]]
+        if {[llength [split [lindex [split $date_raw] 2] ":"]] == 3} {
+            set time_str [string trim [clock format $ts -format "%l:%M:%S"]]
+        } else {
+            set time_str [string trim [clock format $ts -format "%l:%M"]]
+        }
+        set formatted "$day_name $month_name $day_num, $year_str at $time_str $ampm"
+        set msg "Last Login for $login_user: $formatted"
+        if {$host_ip ne "" && $host_ip ne "in" && $host_ip ne "out" && $host_ip ne "still" && ![string match ":*" $host_ip]} {
+            append msg " from $host_ip."
+        } else {
+            append msg "."
+        }
+        puts $msg
+    } err]} {
+        puts "Last Login for $login_user: $date_raw from $host_ip."
+    }
+} elseif {[llength $user_events] == 1} {
+    puts "Last Login for $target_user: First login session."
+} else {
+    puts "Last Login: No previous login records found."
+}
+
 # --- Helper Procedures ---
 
 # Safely run shell commands without crashing on error
