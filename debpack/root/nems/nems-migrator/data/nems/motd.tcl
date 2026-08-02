@@ -20,7 +20,7 @@ proc get_target_user {} {
 set target_user [get_target_user]
 set login_events {}
 
-# Query wtmpdb / last
+# Query wtmpdb / last (Output order: NEWEST to OLDEST)
 if {![catch {exec last -n 30 -a} last_out] && [string length [string trim $last_out]] > 0} {
     set lines [split $last_out "\n"]
     foreach line $lines {
@@ -36,25 +36,27 @@ if {![catch {exec last -n 30 -a} last_out] && [string length [string trim $last_
     }
 }
 
-# Fallback to journalctl
+# Fallback to journalctl (Output order: OLDEST to NEWEST)
 if {[llength $login_events] == 0} {
     set journal_out ""
     catch {set journal_out [exec journalctl --grep "Accepted " -n 100 --no-pager]}
     set lines [split $journal_out "\n"]
+    set journal_events {}
     foreach line $lines {
         if {[regexp {Accepted\s+\S+\s+for\s+(\S+)\s+from\s+(\S+)} $line -> u ip]} {
             set date_raw [string range $line 0 14]
-            lappend login_events [list $u $date_raw $ip]
+            lappend journal_events [list $u $date_raw $ip]
         }
     }
+    set login_events [lreverse $journal_events]
 }
 
 # Auto-detect target user if not set in environment
 if {$target_user eq "" && [llength $login_events] > 0} {
-    set target_user [lindex [lindex $login_events end] 0]
+    set target_user [lindex [lindex $login_events 0] 0]
 }
 
-# Filter events for target user
+# Filter events for target user (Order: NEWEST at Index 0)
 set user_events {}
 foreach event $login_events {
     if {[lindex $event 0] eq $target_user} {
@@ -62,16 +64,49 @@ foreach event $login_events {
     }
 }
 
-# Display logic
-if {[llength $user_events] >= 2} {
-    set prev [lindex $user_events end-1]
-    set login_user [lindex $prev 0]
-    set date_raw   [lindex $prev 1]
-    set host_ip    [lindex $prev 2]
+# Smart resolution of previous session
+set prev_event ""
+set now [clock seconds]
+
+if {[llength $user_events] > 0} {
+    set top_entry [lindex $user_events 0]
+    set date_check [lindex $top_entry 1]
+    if {![regexp {\d{4}} $date_check]} {
+        set year [clock format $now -format "%Y"]
+        set date_check "$date_check $year"
+    }
+    set is_current_session 0
+    if {![catch {set top_ts [clock scan $date_check]}]} {
+        set diff [expr {$now - $top_ts}]
+        if {$diff >= -10 && $diff <= 180} {
+            set is_current_session 1
+        }
+    }
+    if {$is_current_session} {
+        if {[llength $user_events] >= 2} {
+            set prev_event [lindex $user_events 1]
+        } else {
+            puts "Last Login for $target_user: First login session."
+            exit 0
+        }
+    } else {
+        set prev_event [lindex $user_events 0]
+    }
+} else {
+    puts "Last Login: No previous login records found."
+    exit 0
+}
+
+# Output formatting
+if {$prev_event ne ""} {
+    set login_user [lindex $prev_event 0]
+    set date_raw   [lindex $prev_event 1]
+    set host_ip    [lindex $prev_event 2]
     if {![regexp {\d{4}} $date_raw]} {
-        set year [clock format [clock seconds] -format "%Y"]
+        set year [clock format $now -format "%Y"]
         set date_raw "$date_raw $year"
     }
+    set output_msg ""
     if {[catch {
         set ts [clock scan $date_raw]
         set day_name   [clock format $ts -format "%A"]
@@ -79,26 +114,22 @@ if {[llength $user_events] >= 2} {
         set day_num    [scan [clock format $ts -format "%d"] %d]
         set year_str   [clock format $ts -format "%Y"]
         set ampm       [string tolower [clock format $ts -format "%p"]]
-        if {[llength [split [lindex [split $date_raw] 2] ":"]] == 3} {
+        if {[regexp {\d{2}:\d{2}:\d{2}} $date_raw]} {
             set time_str [string trim [clock format $ts -format "%l:%M:%S"]]
         } else {
             set time_str [string trim [clock format $ts -format "%l:%M"]]
         }
         set formatted "$day_name $month_name $day_num, $year_str at $time_str $ampm"
-        set msg "Last Login for $login_user: $formatted"
+        set output_msg "Last Login for $login_user: $formatted"
         if {$host_ip ne "" && $host_ip ne "in" && $host_ip ne "out" && $host_ip ne "still" && ![string match ":*" $host_ip]} {
-            append msg " from $host_ip."
+            append output_msg " from $host_ip."
         } else {
-            append msg "."
+            append output_msg "."
         }
-        puts $msg
     } err]} {
-        puts "Last Login for $login_user: $date_raw from $host_ip."
+        set output_msg "Last Login for $login_user: $date_raw from $host_ip."
     }
-} elseif {[llength $user_events] == 1} {
-    puts "Last Login for $target_user: First login session."
-} else {
-    puts "Last Login: No previous login records found."
+    puts $output_msg
 }
 
 # --- Helper Procedures ---
@@ -229,9 +260,9 @@ puts "  ${C_TITLE}████${C_GRAY}╗  ${C_TITLE}██${C_GRAY}║${C_TITL
 puts "  ${C_TITLE}██${C_GRAY}╔${C_TITLE}██${C_GRAY}╗ ${C_TITLE}██${C_GRAY}║${C_TITLE}█████${C_GRAY}╗  ${C_TITLE}██${C_GRAY}╔${C_TITLE}████${C_GRAY}╔${C_TITLE}██${C_GRAY}║${C_TITLE}███████${C_GRAY}╗"
 puts "  ${C_TITLE}██${C_GRAY}║╚${C_TITLE}██${C_GRAY}╗${C_TITLE}██${C_GRAY}║${C_TITLE}██${C_GRAY}╔══╝  ${C_TITLE}██${C_GRAY}║╚${C_TITLE}██${C_GRAY}╔╝${C_TITLE}██${C_GRAY}║╚════${C_TITLE}██${C_GRAY}║"
 puts "  ${C_TITLE}██${C_GRAY}║ ╚${C_TITLE}████${C_GRAY}║${C_TITLE}███████${C_GRAY}╗${C_TITLE}██${C_GRAY}║ ╚═╝ ${C_TITLE}██${C_GRAY}║${C_TITLE}███████${C_GRAY}║"
-puts "  ${C_GRAY}╚═╝  ╚═══╝╚══════╝╚═╝     ╚═╝╚══════╝  LINUX${C_RESET}"
-puts "                 ${C_GRAY}BY: ROBBIE FERGUSON - NEMSLINUX.COM${C_RESET}\n"
-
+puts "  ${C_GRAY}╚═╝  ╚═══╝╚══════╝╚═╝     ╚═╝╚══════╝"
+puts "                                  LINUX${C_RESET}"
+puts "${C_GRAY}           BY: ROBBIE FERGUSON\n              NEMSLINUX.COM${C_RESET}\n"
 puts "  ${C_LABEL}Platform.....:${C_RESET} ${C_VAL}${nemsplatform}${C_RESET}"
 puts "  ${C_LABEL}NEMS Version.:${C_RESET} ${C_VAL}${ver_str}"
 puts "  ${C_LABEL}IP Address...:${C_RESET} ${C_VAL}${nemsip}${C_RESET}"
