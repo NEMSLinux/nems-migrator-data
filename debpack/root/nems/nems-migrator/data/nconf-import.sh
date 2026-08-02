@@ -3,7 +3,7 @@ ver=$1
 confdest=$2 # Importing from DESTINATION because we already imported the backup to the destination
 
  # Make sure permissions are correct so configs can be written via browser.
- chown -R www-data:www-data /var/www/html/nconf/
+ chown -R www-data:www-data /var/www/nconf/
 
   # Clear the MySQL Database (replace with our blank DB from NEMS-Migrator)
   printf "Creating a clean NEMS NConf configuration... "
