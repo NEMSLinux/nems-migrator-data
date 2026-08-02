@@ -234,7 +234,8 @@ if {$mem_total > 0} {
 
 # --- ANSI Styling Palette ---
 set C_RESET  "\033\[0m"
-set C_TITLE  "\033\[01;32m"
+set C_LOGO_N  "\033\[01;32m"
+set C_LOGO  "\033\[01;37m"
 set C_GRAY   "\033\[01;90m"
 set C_LABEL  "\033\[38;5;141m"
 set C_VAL    "\033\[38;5;81m"
@@ -255,13 +256,13 @@ set mem_bar  [make_bar $mem_pct 14]
 
 # --- Output Rendering ---
 puts ""
-puts "  ${C_TITLE}███${C_GRAY}╗   ${C_TITLE}██${C_GRAY}╗${C_TITLE}███████${C_GRAY}╗${C_TITLE}███${C_GRAY}╗   ${C_TITLE}███${C_GRAY}╗${C_TITLE}███████${C_GRAY}╗"
-puts "  ${C_TITLE}████${C_GRAY}╗  ${C_TITLE}██${C_GRAY}║${C_TITLE}██${C_GRAY}╔════╝${C_TITLE}████${C_GRAY}╗ ${C_TITLE}████${C_GRAY}║${C_TITLE}██${C_GRAY}╔════╝"
-puts "  ${C_TITLE}██${C_GRAY}╔${C_TITLE}██${C_GRAY}╗ ${C_TITLE}██${C_GRAY}║${C_TITLE}█████${C_GRAY}╗  ${C_TITLE}██${C_GRAY}╔${C_TITLE}████${C_GRAY}╔${C_TITLE}██${C_GRAY}║${C_TITLE}███████${C_GRAY}╗"
-puts "  ${C_TITLE}██${C_GRAY}║╚${C_TITLE}██${C_GRAY}╗${C_TITLE}██${C_GRAY}║${C_TITLE}██${C_GRAY}╔══╝  ${C_TITLE}██${C_GRAY}║╚${C_TITLE}██${C_GRAY}╔╝${C_TITLE}██${C_GRAY}║╚════${C_TITLE}██${C_GRAY}║"
-puts "  ${C_TITLE}██${C_GRAY}║ ╚${C_TITLE}████${C_GRAY}║${C_TITLE}███████${C_GRAY}╗${C_TITLE}██${C_GRAY}║ ╚═╝ ${C_TITLE}██${C_GRAY}║${C_TITLE}███████${C_GRAY}║"
+puts "  ${C_LOGO_N}███${C_GRAY}╗   ${C_LOGO_N}██${C_GRAY}╗${C_LOGO}███████${C_GRAY}╗${C_LOGO}███${C_GRAY}╗   ${C_LOGO}███${C_GRAY}╗${C_LOGO}███████${C_GRAY}╗"
+puts "  ${C_LOGO_N}████${C_GRAY}╗  ${C_LOGO_N}██${C_GRAY}║${C_LOGO}██${C_GRAY}╔════╝${C_LOGO}████${C_GRAY}╗ ${C_LOGO}████${C_GRAY}║${C_LOGO}██${C_GRAY}╔════╝"
+puts "  ${C_LOGO_N}██${C_GRAY}╔${C_LOGO_N}██${C_GRAY}╗ ${C_LOGO_N}██${C_GRAY}║${C_LOGO}█████${C_GRAY}╗  ${C_LOGO}██${C_GRAY}╔${C_LOGO}████${C_GRAY}╔${C_LOGO}██${C_GRAY}║${C_LOGO}███████${C_GRAY}╗"
+puts "  ${C_LOGO_N}██${C_GRAY}║╚${C_LOGO_N}██${C_GRAY}╗${C_LOGO_N}██${C_GRAY}║${C_LOGO}██${C_GRAY}╔══╝  ${C_LOGO}██${C_GRAY}║╚${C_LOGO}██${C_GRAY}╔╝${C_LOGO}██${C_GRAY}║╚════${C_LOGO}██${C_GRAY}║"
+puts "  ${C_LOGO_N}██${C_GRAY}║ ╚${C_LOGO_N}████${C_GRAY}║${C_LOGO}███████${C_GRAY}╗${C_LOGO}██${C_GRAY}║ ╚═╝ ${C_LOGO}██${C_GRAY}║${C_LOGO}███████${C_GRAY}║"
 puts "  ${C_GRAY}╚═╝  ╚═══╝╚══════╝╚═╝     ╚═╝╚══════╝"
-puts "                                  LINUX${C_RESET}"
+puts "                                  ${C_LOGO}LINUX${C_RESET}"
 puts "${C_GRAY}           BY: ROBBIE FERGUSON\n              NEMSLINUX.COM${C_RESET}\n"
 puts "  ${C_LABEL}Platform.....:${C_RESET} ${C_VAL}${nemsplatform}${C_RESET}"
 puts "  ${C_LABEL}NEMS Version.:${C_RESET} ${C_VAL}${ver_str}"
